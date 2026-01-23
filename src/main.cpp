@@ -62,7 +62,7 @@ void handleInput(std::function<char()> handler) {
                 break;
             case KEY_ARROW_UP:
                 if (volume == 255) 
-                    volume = minimum; // wrap around for stickS3 users
+                    volume = minimum; // wrap around for stick users
                 else
                     volume = std::min(static_cast<int16_t>(volume + step), maximum);
                 speakerSetVolume(volume);
@@ -78,7 +78,10 @@ void handleInput(std::function<char()> handler) {
                 displaySetBrightness(brightness);
                 break;
             case KEY_ARROW_RIGHT:
-                brightness = std::min(static_cast<int16_t>(brightness + step*2), maximum);
+                if (brightness == maximum) 
+                    brightness = minimum; // wrap around for stick users
+                else
+                    brightness = std::min(static_cast<int16_t>(brightness + step*2), maximum);
                 displaySetBrightness(brightness);
                 break;
             default:

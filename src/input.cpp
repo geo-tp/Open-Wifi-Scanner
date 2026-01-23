@@ -44,6 +44,9 @@ char inputHandler() {
     if (M5.BtnB.wasPressed()) {
         return KEY_ARROW_UP;
     }
+    if (M5.BtnPWR.wasPressed()) {
+        return KEY_ARROW_RIGHT;
+    }
     return KEY_NONE;
 }
 
