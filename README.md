@@ -4,6 +4,11 @@ This tool continuously scans for open networks, searching for internet access, a
 
 ![Open WiFi Scanner](image.jpg)
 
+## Device supported
+
+- <b>M5Cardputer & ADV</b>
+- <b> M5 Stick S3</b>
+
 ## Usage
 
 Monitor nearby Wi-Fi networks continuously, providing real-time feedback through both the display, an LED, and a speaker:
@@ -27,10 +32,12 @@ Monitor nearby Wi-Fi networks continuously, providing real-time feedback through
 - <b>Two bip Tone</b>: Plays when an open network is found.
 - <b>Melody tone</b>: Plays when a web access network is available.
 
+
 ## Installation
 
 - <b>M5Burner</b> : Search into M5CARDPUTER section and simply burn it
 - <b>Old school</b> : Get the firmware from the latest github release.
+
 
 ## Keybinds
 ```
