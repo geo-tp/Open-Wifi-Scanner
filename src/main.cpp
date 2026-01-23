@@ -1,4 +1,3 @@
-#include <M5Cardputer.h>
 #include <FastLED.h>
 #include <algorithm>
 #include <thread>
@@ -8,6 +7,12 @@
 #include <display.h>
 #include <input.h>
 #include <speaker.h>
+
+#ifdef CARDPUTER
+#include <M5Cardputer.h>
+#else
+#include <M5Unified.h>
+#endif
 
 #define PIN_LED    21 // Builtin
 #define NUM_LEDS   1
@@ -47,38 +52,40 @@ void handleInput(std::function<char()> handler) {
 
     while (true) {
         char input = handler();
-
-        if (input != KEY_NONE) {
-            portENTER_CRITICAL(&mux); // Thread lock to update screen
-                switch (input) {
-                    case KEY_OK:
-                        running = !running;
-                        displayTopBar(running);
-                        break;
-                    case KEY_ARROW_UP:
-                        volume = std::min(static_cast<int16_t>(volume + step), maximum);
-                        speakerSetVolume(volume);
-                        displayVolume(volume);
-                        break;
-                    case KEY_ARROW_DOWN:
-                        volume = std::max(static_cast<int16_t>(volume - step), minimum);
-                        speakerSetVolume(volume);
-                        displayVolume(volume);
-                        break;
-                    case KEY_ARROW_LEFT:
-                        brightness = std::max(static_cast<int16_t>(brightness - step*2), minimum);
-                        displaySetBrightness(brightness);
-                        break;
-                    case KEY_ARROW_RIGHT:
-                        brightness = std::min(static_cast<int16_t>(brightness + step*2), maximum);
-                        displaySetBrightness(brightness);
-                        break;
-                    default:
-                        break;
-                }
-            portEXIT_CRITICAL(&mux); // release
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // wait 50ms
+        portENTER_CRITICAL(&mux); // Thread lock to update screen
+        switch (input) {
+            case KEY_NONE:
+                break;
+            case KEY_OK:
+                running = !running;
+                displayTopBar(running);
+                break;
+            case KEY_ARROW_UP:
+                if (volume == 255) 
+                    volume = minimum; // wrap around for stickS3 users
+                else
+                    volume = std::min(static_cast<int16_t>(volume + step), maximum);
+                speakerSetVolume(volume);
+                displayVolume(volume);
+                break;
+            case KEY_ARROW_DOWN:
+                volume = std::max(static_cast<int16_t>(volume - step), minimum);
+                speakerSetVolume(volume);
+                displayVolume(volume);
+                break;
+            case KEY_ARROW_LEFT:
+                brightness = std::max(static_cast<int16_t>(brightness - step*2), minimum);
+                displaySetBrightness(brightness);
+                break;
+            case KEY_ARROW_RIGHT:
+                brightness = std::min(static_cast<int16_t>(brightness + step*2), maximum);
+                displaySetBrightness(brightness);
+                break;
+            default:
+                break;
+            }
+        portEXIT_CRITICAL(&mux); // release
+        vTaskDelay(50 / portTICK_PERIOD_MS); // wait 50ms
     }
 }
 
@@ -114,13 +121,18 @@ void handleState() {
 }
 
 void setup() {
-    auto cfg = M5.config();
-    M5Cardputer.begin(cfg);
+    #ifdef CARDPUTER
+        M5Cardputer.begin();
 
-    // Init LED BUILTIN
-    FastLED.addLeds<WS2812, PIN_LED, GRB>(leds, 1);
-    leds[0] = CRGB::Red;
-    FastLED.show();
+        // Init LED BUILTIN
+        FastLED.addLeds<WS2812, PIN_LED, GRB>(leds, 1);
+        leds[0] = CRGB::Red;
+        FastLED.show();
+    #else
+        // StickS3
+        auto cfg = M5.config();
+        M5.begin(cfg);
+    #endif
 
     displayInit();
     speakerInit();
@@ -136,7 +148,7 @@ void setup() {
     displayLoading();
 
     // Start inputs thread
-    std::thread inputThread(handleInput, cardputerInputHandler);
+    std::thread inputThread(handleInput, inputHandler);
     inputThread.detach();
 }
 
@@ -169,8 +181,8 @@ void loop() {
 
         // Thread lock to update screen
         portENTER_CRITICAL(&mux); 
-            displayList(finalNetworks);
-            displayWifiCount(finalNetworks);
+        displayList(finalNetworks);
+        displayWifiCount(finalNetworks);
         portEXIT_CRITICAL(&mux); // release
 
         handleState(); // update app state

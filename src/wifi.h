@@ -1,7 +1,6 @@
 #ifndef WIFI_H
 #define WIFI_H
 
-#include <M5Cardputer.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 

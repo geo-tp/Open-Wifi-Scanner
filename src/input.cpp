@@ -1,6 +1,9 @@
 #include "input.h"
 
-char cardputerInputHandler() {
+#ifdef CARDPUTER
+
+#include <M5Cardputer.h>
+char inputHandler() {
     // Update keyboard state
     M5Cardputer.update();
 
@@ -29,3 +32,20 @@ char cardputerInputHandler() {
     }
     return KEY_NONE;
 }
+
+#else
+#include <M5Unified.h>
+char inputHandler() {
+    M5.update();
+
+    if (M5.BtnA.wasPressed()) {
+        return KEY_OK;
+    }
+    if (M5.BtnB.wasPressed()) {
+        return KEY_ARROW_UP;
+    }
+    return KEY_NONE;
+}
+
+#endif
+
