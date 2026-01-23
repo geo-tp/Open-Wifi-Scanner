@@ -7,7 +7,8 @@ This tool continuously scans for open networks, searching for internet access, a
 ## Device supported
 
 - <b>M5Cardputer & ADV</b>
-- <b> M5 Stick S3</b>
+- <b>M5Stick S3</b>
+- <b>M5Stick CPlus2</b>
 
 ## Usage
 
